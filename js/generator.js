@@ -104,8 +104,9 @@ function randomPerm(rng, n, free) {
 }
 
 // Todas las afirmaciones verdaderas sobre la solución, agrupadas por tipo y persona.
+// La víctima no declara ni aparece en ninguna declaración: su casilla es la única que queda libre.
 function allFacts(puz, prep) {
-  const { n, solution: pos, victim: V, murderer: M } = puz;
+  const { n, solution: pos, victim: V } = puz;
   const R = puz.roomTypes.length;
   const roomOf = pos.map((c) => puz.rooms[c]);
   const countIn = new Array(R).fill(0);
@@ -113,18 +114,17 @@ function allFacts(puz, prep) {
   const present = [...new Set(puz.objs.filter(Boolean))];
   const out = [];
   for (let p = 0; p < n; p++) {
+    if (p === V) continue;
     const c = pos[p], r = roomOf[p], o = puz.objs[c];
     out.push({ t: 'room', p, r });
     for (let r2 = 0; r2 < R; r2++) if (r2 !== r) out.push({ t: 'notRoom', p, r: r2 });
     out.push(o ? { t: 'on', p, o } : { t: 'floor', p });
     for (const o2 of prep.adj[c]) out.push({ t: 'next', p, o: o2 });
     for (const o2 of present) if (!prep.adj[c].has(o2)) out.push({ t: 'notNext', p, o: o2 });
-    if (p !== V) out.push(countIn[r] === 1 ? { t: 'alone', p } : { t: 'notAlone', p });
+    out.push(countIn[r] === 1 ? { t: 'alone', p } : { t: 'notAlone', p });
     for (let q = 0; q < n; q++) {
-      if (q === p) continue;
-      const isPair = (p === V && q === M) || (p === M && q === V);
-      if (roomOf[p] === roomOf[q]) { if (!isPair) out.push({ t: 'same', p, q }); }
-      else out.push({ t: 'diff', p, q });
+      if (q === p || q === V) continue;
+      out.push({ t: roomOf[p] === roomOf[q] ? 'same' : 'diff', p, q });
       out.push({ t: Math.floor(c / n) < Math.floor(pos[q] / n) ? 'north' : 'south', p, q });
       out.push({ t: c % n < pos[q] % n ? 'west' : 'east', p, q });
     }
@@ -197,6 +197,7 @@ function tryGenerate(rng, cfg, scen) {
   const ordered = orderFacts(rng, allFacts(puz, prep), cfg.weights);
   const chosen = [];
   for (let p = 0; p < n; p++) {
+    if (p === V) continue;
     const f = ordered.find((x) => x.p === p);
     if (f) chosen.push(f);
   }

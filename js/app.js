@@ -190,6 +190,7 @@ function openGame(game) {
   $('#story').innerHTML = `${esc(V.short)}, ${esc(V.role)}, fue ${V.f ? 'hallada' : 'hallado'} sin vida en ${esc(puz.place)}. ` +
     `Hay ${puz.n - 1} sospechosos y una sola verdad: el asesino estaba a solas con su víctima.`;
 
+  if (!G.solved) syncVictim();
   buildBoard();
   renderAll();
   $('#stampBig').hidden = !G.solved;
@@ -317,17 +318,22 @@ function renderTray() {
   $('#tray').querySelectorAll('.token').forEach((b) => (b.onclick = () => selectPerson(Number(b.dataset.p))));
 }
 
-function trayOrder() {
+function suspects() {
   const { puz } = G;
-  return [puz.victim, ...[...Array(puz.n).keys()].filter((p) => p !== puz.victim)];
+  return [...Array(puz.n).keys()].filter((p) => p !== puz.victim);
+}
+
+function trayOrder() {
+  return [G.puz.victim, ...suspects()];
 }
 
 function renderDossier() {
   const { puz } = G;
   const cards = trayOrder().map((p) => {
     const pe = puz.people[p];
-    const clues = puz.clues.filter((cl) => cl.p === p).map((cl) => `<li>${esc(clueText(cl, puz))}</li>`).join('')
-      || `<li class="none">No ha querido declarar.</li>`;
+    const clues = p === puz.victim
+      ? `<li class="none">No puede declarar. Aparecerá sola en la única casilla libre cuando hayas situado a todos los sospechosos.</li>`
+      : puz.clues.filter((cl) => cl.p === p).map((cl) => `<li>${esc(clueText(cl, puz))}</li>`).join('') || `<li class="none">No ha querido declarar.</li>`;
     const c = G.pos[p];
     return `<div class="card${p === puz.victim ? ' victim' : ''}${p === selected ? ' sel' : ''}" data-p="${p}" role="button" tabindex="0">
       <div class="mug">${pe.emoji}</div>
@@ -340,7 +346,7 @@ function renderDossier() {
     </div>`;
   }).join('');
   $('#dossier').innerHTML = `
-    <p class="rule-box"><b>Regla de oro:</b> una persona por fila y por columna. La víctima estaba a solas con su asesino: en su habitación había exactamente dos personas.</p>
+    <p class="rule-box"><b>Regla de oro:</b> una persona por fila y por columna. La víctima ocupa la única casilla que queda libre, y estaba a solas con su asesino: en su habitación había exactamente dos personas.</p>
     <div class="cards">${cards}</div>`;
   $('#dossier').querySelectorAll('.card').forEach((el) => {
     el.onclick = () => selectPerson(Number(el.dataset.p));
@@ -353,6 +359,10 @@ function renderDossier() {
    ============================================================ */
 function selectPerson(p) {
   if (G.solved) return;
+  if (p === G.puz.victim) {
+    toast('La víctima no se sitúa a mano: aparecerá sola en la única casilla libre cuando hayas colocado a todos los sospechosos.', 3600);
+    return;
+  }
   selected = selected === p ? null : p;
   const pe = G.puz.people[p];
   if (selected !== null) {
@@ -411,8 +421,39 @@ function flash(c) {
   el.classList.add('flash');
 }
 
+// La víctima no se coloca a mano: aparece en la única fila y columna libres cuando todos los sospechosos están situados.
+function syncVictim() {
+  const { puz } = G;
+  const n = puz.n, V = puz.victim;
+  G.pos[V] = -1;
+  const others = G.pos.filter((c, p) => p !== V);
+  if (others.some((c) => c < 0)) return null;
+  const rows = new Set(others.map((c) => Math.floor(c / n)));
+  const cols = new Set(others.map((c) => c % n));
+  if (rows.size !== n - 1 || cols.size !== n - 1) return null;
+  const r = [...Array(n).keys()].find((i) => !rows.has(i));
+  const k = [...Array(n).keys()].find((i) => !cols.has(i));
+  const c = r * n + k;
+  const o = puz.objs[c] ? OBJECTS[puz.objs[c]] : null;
+  if (o?.block) return { blocked: c, o };
+  G.pos[V] = c;
+  G.marks = G.marks.filter((m) => m !== c);
+  return null;
+}
+
 function afterChange() {
+  const V = G.puz.victim;
+  const before = G.pos[V];
+  const res = syncVictim();
   renderAll();
+  if (G.pos[V] >= 0 && G.pos[V] !== before) {
+    boardEl.querySelector(`[data-c="${G.pos[V]}"]`)?.classList.add('reveal');
+    $('#cellInfo').innerHTML = `${G.puz.people[V].emoji} La víctima aparece en la única casilla libre: <b>${coord(G.pos[V], G.puz.n)}</b>.`;
+  }
+  if (res?.blocked != null) {
+    flash(res.blocked);
+    toast(`🧐 La única casilla libre (${coord(res.blocked, G.puz.n)}) tiene ${res.o.un} ${res.o.emoji}: ahí no puede estar la víctima. Algo no encaja.`, 4200);
+  }
   save();
   checkComplete();
 }
@@ -439,6 +480,7 @@ function undo() {
   G.pos = s.pos;
   G.marks = s.marks;
   selected = null;
+  syncVictim();
   renderAll();
   save();
 }
@@ -446,7 +488,7 @@ function undo() {
 function hint() {
   if (!G || G.solved) return;
   const { puz } = G;
-  const wrong = G.pos.findIndex((c, p) => c >= 0 && c !== puz.solution[p]);
+  const wrong = G.pos.findIndex((c, p) => p !== puz.victim && c >= 0 && c !== puz.solution[p]);
   G.hints++;
   if (wrong >= 0) {
     const pe = puz.people[wrong];
@@ -455,7 +497,7 @@ function hint() {
     G.pos[wrong] = -1;
   } else {
     // Revela la posición de una persona que aún no está en el plano.
-    const missing = trayOrder().filter((p) => G.pos[p] < 0);
+    const missing = suspects().filter((p) => G.pos[p] < 0);
     if (!missing.length) return;
     const p = missing[Math.floor(Math.random() * missing.length)];
     const c = puz.solution[p];
@@ -623,10 +665,11 @@ function showHelp() {
   modal(`
     <h3>Cómo se juega</h3>
     <ol class="rules">
-      <li>Cada caso es un plano dividido en habitaciones. Debes situar a <b>todas las personas</b>, incluida la víctima.</li>
+      <li>Cada caso es un plano dividido en habitaciones. Debes situar a <b>todos los sospechosos</b> según sus declaraciones.</li>
       <li>Hay <b>exactamente una persona por fila y una por columna</b>.</li>
       <li>Cada declaración es verdad. <i>«Junto a»</i> significa en una casilla contigua horizontal o vertical (no en diagonal), aunque haya una pared en medio.</li>
       <li><i>«Más al norte»</i> significa en una fila superior del plano; <i>«más al oeste»</i>, en una columna más a la izquierda.</li>
+      <li>La víctima <b>no declara</b>: cuando sitúes a todos los sospechosos, aparecerá sola en la única casilla que quede libre.</li>
       <li>La víctima estaba <b>a solas con su asesino</b>: en su habitación había exactamente dos personas. Cuando lo tengas todo, señala al culpable.</li>
     </ol>
     <p><b>${`Muebles ${G ? `de ${scen.name.toLowerCase()}` : 'de la mansión'}`.replace(' de el ', ' del ')} ${scen.emoji}.</b> Se puede estar sobre:</p>
@@ -683,7 +726,7 @@ document.addEventListener('keydown', (e) => {
   if (!G || !$('#modal').hidden) return;
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); undo(); }
   const num = Number(e.key);
-  if (num >= 1 && num <= G.puz.n && !e.ctrlKey && !e.metaKey) selectPerson(trayOrder()[num - 1]);
+  if (num >= 1 && num < G.puz.n && !e.ctrlKey && !e.metaKey) selectPerson(suspects()[num - 1]);
 });
 document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
 setInterval(updateCountdown, 30000);

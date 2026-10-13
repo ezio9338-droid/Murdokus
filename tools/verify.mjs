@@ -19,6 +19,7 @@ for (const diff of Object.keys(DIFFICULTIES)) {
     const cols = new Set(puz.solution.map((c) => c % puz.n));
     if (!ok || rows.size !== puz.n || cols.size !== puz.n) { failures++; console.log('FALLO', diff, i); }
     for (const cl of puz.clues) if (!clueText(cl, puz)) { failures++; console.log('Pista sin texto', cl); }
+    if (puz.clues.some((cl) => cl.p === puz.victim || cl.q === puz.victim)) { failures++; console.log('Pista sobre la víctima', diff, i); }
   }
   times.sort((a, b) => a - b);
   const avg = (a) => (a.reduce((s, x) => s + x, 0) / a.length).toFixed(1);
