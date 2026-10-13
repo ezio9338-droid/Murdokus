@@ -667,7 +667,7 @@ function showHelp() {
     <ol class="rules">
       <li>Cada caso es un plano dividido en habitaciones. Debes situar a <b>todos los sospechosos</b> según sus declaraciones.</li>
       <li>Hay <b>exactamente una persona por fila y una por columna</b>.</li>
-      <li>Cada declaración es verdad. <i>«Junto a»</i> significa en una casilla contigua horizontal o vertical (no en diagonal), aunque haya una pared en medio.</li>
+      <li>Cada declaración es verdad. <i>«Junto a»</i> significa en una casilla contigua horizontal o vertical (no en diagonal) y <b>sin pared en medio</b>: las dos casillas tienen que estar en la misma habitación.</li>
       <li><i>«Más al norte»</i> significa en una fila superior del plano; <i>«más al oeste»</i>, en una columna más a la izquierda.</li>
       <li>La víctima <b>no declara</b>: cuando sitúes a todos los sospechosos, aparecerá sola en la única casilla que quede libre.</li>
       <li>La víctima estaba <b>a solas con su asesino</b>: en su habitación había exactamente dos personas. Cuando lo tengas todo, señala al culpable.</li>

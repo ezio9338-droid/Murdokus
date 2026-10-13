@@ -16,7 +16,10 @@ export function prepare(puz) {
     for (const [dr, dk] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
       const rr = r + dr, kk = k + dk;
       if (rr < 0 || kk < 0 || rr >= n || kk >= n) continue;
-      const o = puz.objs[rr * n + kk];
+      const nb = rr * n + kk;
+      // «Junto a» no atraviesa paredes: la casilla vecina tiene que ser de la misma habitación.
+      if (puz.rooms[nb] !== puz.rooms[c]) continue;
+      const o = puz.objs[nb];
       if (o) s.add(o);
     }
     adj.push(s);
