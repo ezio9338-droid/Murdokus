@@ -175,7 +175,8 @@ function tryGenerate(rng, cfg) {
   }
   if (!pair) return null;
 
-  const people = rng.shuffle(PEOPLE).slice(0, n);
+  const origin = rng.next() < 0.5 ? 'es' : 'en';
+  const people = rng.shuffle(PEOPLE).slice(0, n).map(({ names, ...rest }) => ({ ...rest, short: names[origin] }));
   const V = rng.int(n);
   let M = rng.int(n - 1); if (M >= V) M++;
   const solution = new Array(n);
@@ -187,7 +188,7 @@ function tryGenerate(rng, cfg) {
   const puz = {
     n, rooms, roomTypes: roomTypes.map(({ name, art }) => ({ name, art })), objs, people,
     victim: V, murderer: M, solution,
-    place: rng.pick(PLACES), weapon: rng.pick(WEAPONS),
+    origin, place: rng.pick(PLACES[origin]), weapon: rng.pick(WEAPONS),
   };
   const prep = prepare(puz);
 
