@@ -1,9 +1,9 @@
 // Generador de casos: plano de habitaciones, muebles, colocación secreta y pistas
 // mínimas que conducen a una única solución.
-import { makeRng } from './rng.js';
-import { OBJECTS } from './data.js';
-import { SCENARIOS, SCENARIO_IDS } from './scenarios.js';
-import { prepare, solve } from './solver.js';
+import { makeRng } from './rng.js?v=7';
+import { OBJECTS } from './data.js?v=7';
+import { SCENARIOS, SCENARIO_IDS } from './scenarios.js?v=7';
+import { prepare, solve } from './solver.js?v=7';
 
 const W = (o) => ({ room: 0, notRoom: 0, on: 0, floor: 0, next: 0, notNext: 0, alone: 0, notAlone: 0, same: 0, diff: 0, north: 0, south: 0, west: 0, east: 0, ...o });
 

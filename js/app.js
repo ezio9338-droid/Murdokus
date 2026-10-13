@@ -1,6 +1,6 @@
-import { generate, clueText, DIFFICULTIES } from './generator.js';
-import { OBJECTS } from './data.js';
-import { SCENARIOS, SCENARIO_IDS } from './scenarios.js';
+import { generate, clueText, DIFFICULTIES } from './generator.js?v=7';
+import { OBJECTS } from './data.js?v=7';
+import { SCENARIOS, SCENARIO_IDS } from './scenarios.js?v=7';
 
 /* ============================================================
    Utilidades
@@ -741,5 +741,5 @@ setInterval(updateCountdown, 30000);
 })();
 
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.register('sw.js?v=7').catch(() => {});
 }

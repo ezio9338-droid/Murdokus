@@ -25,6 +25,8 @@ No hace falta compilar nada: es HTML, CSS y JavaScript estático.
 python3 -m http.server 8000      # y abre http://localhost:8000
 node tools/verify.mjs 64         # comprueba que todos los casos generados tengan solución única
 node tools/check-scenarios.mjs   # comprueba que los escenarios estén completos
+node tools/check-adjacency.mjs   # solucionador independiente: «junto a» nunca atraviesa paredes
+node tools/bump-version.mjs      # sube la versión de los archivos tras cada cambio (evita cachés mezcladas)
 ```
 
 Estructura:

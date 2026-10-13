@@ -1,6 +1,6 @@
 // Solucionador por vuelta atrás. Cuenta soluciones (hasta un límite) para comprobar
 // que cada caso generado tiene exactamente una solución.
-import { OBJECTS } from './data.js';
+import { OBJECTS } from './data.js?v=7';
 
 export const UNARY = new Set(['room', 'notRoom', 'on', 'floor', 'next', 'notNext']);
 export const BINARY = new Set(['same', 'diff', 'north', 'south', 'west', 'east']);

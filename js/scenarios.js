@@ -1,7 +1,7 @@
 // Escenarios del crimen. Cada uno tiene sus habitaciones (con los muebles que pueden aparecer),
 // personajes con nombre español y extranjero, lugares a juego, armas y el aspecto del suelo.
 // Personajes: [emoji, nombre español, nombre extranjero, papel, femenino, tono de piel (0 = sin tono)]
-import { withTone, ROOM_TYPES, PEOPLE, PLACES, WEAPONS } from './data.js';
+import { withTone, ROOM_TYPES, PEOPLE, PLACES, WEAPONS } from './data.js?v=7';
 
 const people = (list) => list.map(([emoji, es, en, role, f, t]) => ({ emoji: withTone(emoji, t), names: { es, en }, role, f }));
 const rooms = (list) => list.map(([name, art, objs]) => ({ name, art, objs }));
