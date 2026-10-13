@@ -2,6 +2,7 @@
 // Uso: node tools/verify.mjs [casos por dificultad]
 import { generate, DIFFICULTIES, clueText } from '../js/generator.js';
 import { solve } from '../js/solver.js';
+import { SCENARIO_IDS } from '../js/scenarios.js';
 
 const count = Number(process.argv[2] || 30);
 let failures = 0;
@@ -9,7 +10,7 @@ for (const diff of Object.keys(DIFFICULTIES)) {
   const times = [], clues = [];
   for (let i = 0; i < count; i++) {
     const t0 = performance.now();
-    const puz = generate(`test-${i}`, diff);
+    const puz = generate(`test-${i}`, diff, SCENARIO_IDS[i % SCENARIO_IDS.length]);
     times.push(performance.now() - t0);
     clues.push(puz.clues.length);
     const res = solve(puz, puz.clues, 2);

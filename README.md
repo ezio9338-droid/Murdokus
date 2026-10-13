@@ -4,6 +4,8 @@ Puzles de asesinato al estilo sudoku, con estética noir. Coloca a cada sospecho
 
 - **Caso del día**: el mismo para todo el mundo. Lunes y martes fácil, de miércoles a viernes medio, y el fin de semana difícil. Lleva la cuenta de tu racha.
 - **Modo ilimitado**: casos nuevos sin límite en Fácil (5×5), Medio (6×6) o Difícil (7×7). Cada caso tiene un código (`?caso=ABCDE&d=medio`) que puedes compartir para retar a alguien con el mismo puzle.
+- **16 escenarios**, cada uno con sus habitaciones, muebles, personajes, lugares, armas y suelo propios: la mansión, el circo, el transatlántico, el teatro, la estación espacial, el tren nocturno, el museo, el castillo medieval, el barco pirata, el salvaje Oeste, el hospital, el estudio de cine, el chalet de montaña, la excavación en Egipto, el internado y el casino. El caso diario cambia de escenario cada día; en el modo ilimitado puedes elegirlo o dejarlo al azar.
+- En cada caso los nombres son todos españoles o todos extranjeros.
 - Cada caso se genera al momento y se comprueba que tenga **una única solución**.
 - Pistas, deshacer, marcas ✕, cronómetro, historial y resultado para compartir.
 - Adaptado a móvil e instalable como app (“Añadir a pantalla de inicio”). Funciona sin conexión.
@@ -21,14 +23,16 @@ No hace falta compilar nada: es HTML, CSS y JavaScript estático.
 
 ```bash
 python3 -m http.server 8000      # y abre http://localhost:8000
-node tools/verify.mjs 50         # comprueba que todos los casos generados tengan solución única
+node tools/verify.mjs 64         # comprueba que todos los casos generados tengan solución única
+node tools/check-scenarios.mjs   # comprueba que los escenarios estén completos
 ```
 
 Estructura:
 
 - `js/generator.js`: crea el plano, los muebles, la solución secreta y las pistas mínimas.
 - `js/solver.js`: solucionador que garantiza que la solución sea única.
-- `js/data.js`: habitaciones, muebles, personajes, lugares y armas (para añadir contenido).
+- `js/data.js`: catálogo de muebles y contenido de la mansión clásica.
+- `js/scenarios.js`: los escenarios (para añadir uno nuevo, copia uno existente y cambia su contenido).
 - `js/app.js`: la interfaz del juego.
 
 Inspirado en los *Murdoku* de Manuel Garand.

@@ -1,7 +1,8 @@
 // Generador de casos: plano de habitaciones, muebles, colocación secreta y pistas
 // mínimas que conducen a una única solución.
 import { makeRng } from './rng.js';
-import { OBJECTS, ROOM_TYPES, PEOPLE, PLACES, WEAPONS } from './data.js';
+import { OBJECTS } from './data.js';
+import { SCENARIOS, SCENARIO_IDS } from './scenarios.js';
 import { prepare, solve } from './solver.js';
 
 const W = (o) => ({ room: 0, notRoom: 0, on: 0, floor: 0, next: 0, notNext: 0, alone: 0, notAlone: 0, same: 0, diff: 0, north: 0, south: 0, west: 0, east: 0, ...o });
@@ -148,11 +149,11 @@ function orderFacts(rng, facts, weights) {
   return out;
 }
 
-function tryGenerate(rng, cfg) {
+function tryGenerate(rng, cfg, scen) {
   const n = cfg.n, N = n * n;
   const k = cfg.rooms[0] + rng.int(cfg.rooms[1] - cfg.rooms[0] + 1);
   const { grid: rooms, count: R } = makeRooms(rng, n, k);
-  const roomTypes = rng.shuffle(ROOM_TYPES).slice(0, R).map(({ name, art }, i) => ({ name, art, objs: ROOM_TYPES.find((t) => t.name === name).objs }));
+  const roomTypes = rng.shuffle(scen.rooms).slice(0, R);
 
   const objs = new Array(N).fill(null);
   for (let id = 0; id < R; id++) {
@@ -176,7 +177,7 @@ function tryGenerate(rng, cfg) {
   if (!pair) return null;
 
   const origin = rng.next() < 0.5 ? 'es' : 'en';
-  const people = rng.shuffle(PEOPLE).slice(0, n).map(({ names, ...rest }) => ({ ...rest, short: names[origin] }));
+  const people = rng.shuffle(scen.people).slice(0, n).map(({ names, ...rest }) => ({ ...rest, short: names[origin] }));
   const V = rng.int(n);
   let M = rng.int(n - 1); if (M >= V) M++;
   const solution = new Array(n);
@@ -188,7 +189,7 @@ function tryGenerate(rng, cfg) {
   const puz = {
     n, rooms, roomTypes: roomTypes.map(({ name, art }) => ({ name, art })), objs, people,
     victim: V, murderer: M, solution,
-    origin, place: rng.pick(PLACES[origin]), weapon: rng.pick(WEAPONS),
+    scenario: scen.id, origin, place: rng.pick(scen.places[origin]), weapon: rng.pick(scen.weapons),
   };
   const prep = prepare(puz);
 
@@ -222,11 +223,13 @@ function tryGenerate(rng, cfg) {
   return puz;
 }
 
-export function generate(seed, diff) {
+// Sin escenario, se elige uno a partir de la semilla (así el caso diario es el mismo para todos).
+export function generate(seed, diff, scenarioId) {
   const cfg = DIFFICULTIES[diff];
   const rng = makeRng(`${seed}|${diff}`);
+  const scen = SCENARIOS[scenarioId] || SCENARIOS[rng.pick(SCENARIO_IDS)];
   for (let attempt = 0; attempt < 300; attempt++) {
-    const puz = tryGenerate(rng, cfg);
+    const puz = tryGenerate(rng, cfg, scen);
     if (puz) return { ...puz, seed, diff };
   }
   throw new Error('No se pudo generar el caso');

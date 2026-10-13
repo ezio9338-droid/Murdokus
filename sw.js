@@ -1,6 +1,6 @@
 // Red primero y caché como respaldo: siempre la última versión, y funciona sin conexión.
-const CACHE = 'murdokus-v2';
-const CORE = ['./', 'index.html', 'css/style.css', 'js/app.js', 'js/generator.js', 'js/solver.js', 'js/data.js', 'js/rng.js', 'manifest.webmanifest', 'icons/icon-192.png'];
+const CACHE = 'murdokus-v3';
+const CORE = ['./', 'index.html', 'css/style.css', 'js/app.js', 'js/generator.js', 'js/solver.js', 'js/data.js', 'js/rng.js', 'js/scenarios.js', 'manifest.webmanifest', 'icons/icon-192.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)).then(() => self.skipWaiting()));

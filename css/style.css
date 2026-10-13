@@ -128,6 +128,18 @@ button { font: inherit; color: inherit; touch-action: manipulation; -webkit-tap-
 .diff-btn .d-size { display: block; font-size: 13px; color: var(--ink-soft); }
 .diff-btn .d-dots { display: block; color: var(--red); letter-spacing: 3px; margin-top: 2px; }
 #resumeFree:not(:empty) { margin-top: 14px; }
+.scen-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(136px, 1fr)); gap: 8px; margin: 0 0 18px; }
+.scen-chip {
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px; cursor: pointer; text-align: left;
+  background: rgba(255, 250, 235, .3); color: var(--ink); border: 1.5px solid rgba(27, 21, 16, .25); border-radius: var(--radius);
+  transition: background .2s, border-color .2s, transform .12s;
+}
+.scen-chip:hover { background: rgba(255, 250, 235, .65); }
+.scen-chip:active { transform: scale(.97); }
+.scen-chip.on { background: var(--ink); color: var(--paper-3); border-color: var(--ink); box-shadow: 0 0 0 2px var(--red) inset; }
+.scen-chip .s-e { font-size: 22px; line-height: 1; flex: none; }
+.scen-chip { min-width: 0; }
+.scen-chip .s-n { font-size: 12px; line-height: 1.15; min-width: 0; overflow-wrap: anywhere; }
 .resume { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 1px dashed rgba(27, 21, 16, .5); border-radius: var(--radius); font-size: 14px; }
 
 .home-links { display: flex; gap: 10px; justify-content: center; margin-top: 30px; flex-wrap: wrap; }
@@ -180,10 +192,34 @@ button { font: inherit; color: inherit; touch-action: manipulation; -webkit-tap-
   content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .5;
   background: repeating-linear-gradient(90deg, rgba(80, 50, 20, .05) 0 1px, transparent 1px 12px);
 }
-.cell.room-0 { --room-bg: #e6d8b6; } .cell.room-1 { --room-bg: #d9c8a0; } .cell.room-2 { --room-bg: #eadfc4; }
-.cell.room-3 { --room-bg: #d3c197; } .cell.room-4 { --room-bg: #e0cfa9; } .cell.room-5 { --room-bg: #cfbd94; }
+.cell.room-0 { --room-bg: var(--r0, #e6d8b6); } .cell.room-1 { --room-bg: var(--r1, #d9c8a0); } .cell.room-2 { --room-bg: var(--r2, #eadfc4); }
+.cell.room-3 { --room-bg: var(--r3, #d3c197); } .cell.room-4 { --room-bg: var(--r4, #e0cfa9); } .cell.room-5 { --room-bg: var(--r5, #cfbd94); }
 .cell.room-1::before, .cell.room-4::before { background: repeating-linear-gradient(0deg, rgba(80, 50, 20, .05) 0 1px, transparent 1px 12px); }
 .cell.room-2::before, .cell.room-5::before { background: repeating-linear-gradient(45deg, rgba(80, 50, 20, .05) 0 1px, transparent 1px 10px); }
+
+/* suelos de cada escenario */
+.floor-planks .cell.cell::before { opacity: 1; background: repeating-linear-gradient(0deg, rgba(80, 50, 20, .1) 0 1px, transparent 1px 12px); }
+.floor-tiles .cell.cell::before { opacity: 1; background: repeating-conic-gradient(rgba(70, 55, 30, .07) 0 25%, transparent 0 50%) 0 0 / 50% 50%; }
+.floor-stripes .cell.cell::before { opacity: 1; background: repeating-linear-gradient(90deg, rgba(160, 40, 30, .09) 0 12.5%, transparent 12.5% 25%); }
+.floor-metal .cell.cell::before {
+  opacity: 1;
+  background:
+    radial-gradient(circle, rgba(40, 50, 60, .25) 1.2px, transparent 1.6px) 4px 4px / calc(100% - 8px) calc(100% - 8px),
+    linear-gradient(rgba(40, 50, 60, .08) 1px, transparent 1px) 0 0 / 100% 50%,
+    linear-gradient(90deg, rgba(40, 50, 60, .08) 1px, transparent 1px) 0 0 / 50% 100%;
+}
+.floor-stone .cell.cell::before {
+  opacity: 1;
+  background:
+    linear-gradient(rgba(60, 50, 40, .14) 1px, transparent 1px) 0 0 / 100% 33.4%,
+    linear-gradient(90deg, rgba(60, 50, 40, .1) 1px, transparent 1px) 0 0 / 50% 66.8%,
+    linear-gradient(90deg, rgba(60, 50, 40, .1) 1px, transparent 1px) 25% 33.4% / 50% 66.8%;
+}
+.floor-sand .cell.cell::before { opacity: 1; background: radial-gradient(rgba(130, 85, 30, .16) 1px, transparent 1.4px) 0 0 / 7px 7px, radial-gradient(rgba(130, 85, 30, .1) 1px, transparent 1.4px) 3px 4px / 9px 9px; }
+.floor-carpet .cell.cell::before {
+  opacity: 1;
+  background: repeating-linear-gradient(45deg, rgba(130, 40, 30, .07) 0 2px, transparent 2px 9px), repeating-linear-gradient(-45deg, rgba(130, 40, 30, .07) 0 2px, transparent 2px 9px);
+}
 
 /* muros: borde grueso donde cambia la habitación */
 .cell.wt { border-top: calc(var(--cs) * .045 + 1px) solid var(--wall); }
@@ -382,6 +418,8 @@ table.hist th, table.hist td { padding: 6px 4px; text-align: left; border-bottom
   .diff-btn { padding: 12px 4px 10px; }
   .diff-btn .d-size { font-size: 12px; }
   .diff-btn .d-sus { display: none; }
+  .scen-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .scen-chip { padding: 7px 8px; }
   .folder::after { right: 18px; height: 40px; width: 14px; top: -10px; }
   .folder-title { padding-right: 24px; font-size: 25px; }
   .modal { align-items: flex-end; padding: 0; }

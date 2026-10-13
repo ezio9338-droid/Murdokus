@@ -1,5 +1,6 @@
 import { generate, clueText, DIFFICULTIES } from './generator.js';
 import { OBJECTS } from './data.js';
+import { SCENARIOS, SCENARIO_IDS } from './scenarios.js';
 
 /* ============================================================
    Utilidades
@@ -50,7 +51,7 @@ function save() {
   const { pos, marks, elapsed, hints, mistakes, hinted, solved, accused } = G;
   const state = { pos, marks, elapsed, hints, mistakes, hinted, solved, accused };
   if (G.mode === 'daily') store.set('daily:' + G.date, state);
-  else store.set('free', { code: G.code, diff: G.puz.diff, state });
+  else store.set('free', { code: G.code, diff: G.puz.diff, scen: G.puz.scenario, state });
 }
 
 /* ============================================================
@@ -63,6 +64,7 @@ function renderHome() {
   const st = store.get('daily:' + date, null);
   const streak = computeStreak();
   const cfg = DIFFICULTIES[diff];
+  const scen = SCENARIOS[generate('daily-' + date, diff).scenario];
   let action = 'Abrir el caso';
   let status = '';
   if (st?.solved) {
@@ -76,6 +78,7 @@ function renderHome() {
     <h2 class="folder-title">Expediente nº ${String(caseNumber(today)).padStart(3, '0')}</h2>
     <div class="daily-meta">
       <span>📅 <b>${niceDate(today)}</b></span>
+      <span>Escenario: <b>${scen.emoji} ${scen.name}</b></span>
       <span>Dificultad: <b>${cfg.label} ${cfg.n}×${cfg.n}</b></span>
       <span>Racha: <b>${streak} ${streak === 1 ? 'día' : 'días'}</b></span>
     </div>
@@ -92,13 +95,26 @@ function renderHome() {
       <span class="d-size">${c.n}×${c.n}<span class="d-sus"> · ${c.n - 1} sospechosos</span></span>
       <span class="d-dots">${dots(k)}</span>
     </button>`).join('');
-  $('#diffGrid').querySelectorAll('.diff-btn').forEach((b) => (b.onclick = () => startFree(b.dataset.diff)));
+  $('#diffGrid').querySelectorAll('.diff-btn').forEach((b) => (b.onclick = () => startFree(b.dataset.diff, null, pickScenario())));
+
+  const pref = store.get('scen', 'random');
+  $('#scenGrid').innerHTML = [['random', '🎲', 'Al azar'], ...SCENARIO_IDS.map((id) => [id, SCENARIOS[id].emoji, SCENARIOS[id].name])]
+    .map(([id, e, name]) => `<button class="scen-chip${id === pref ? ' on' : ''}" data-s="${id}" aria-pressed="${id === pref}"><span class="s-e">${e}</span><span class="s-n">${esc(name)}</span></button>`).join('');
+  $('#scenGrid').querySelectorAll('.scen-chip').forEach((b) => (b.onclick = () => {
+    store.set('scen', b.dataset.s);
+    $('#scenGrid').querySelectorAll('.scen-chip').forEach((x) => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); });
+  }));
 
   const free = store.get('free', null);
   $('#resumeFree').innerHTML = free && !free.state.solved
-    ? `<div class="resume"><span>Caso abierto <b>#${esc(free.code)}</b> · ${DIFFICULTIES[free.diff].label} · ${fmt(free.state.elapsed)}</span><button class="btn btn-paper btn-sm" id="btnResume">Continuar</button></div>`
+    ? `<div class="resume"><span>${SCENARIOS[free.scen]?.emoji || ''} Caso abierto <b>#${esc(free.code)}</b> · ${DIFFICULTIES[free.diff].label} · ${fmt(free.state.elapsed)}</span><button class="btn btn-paper btn-sm" id="btnResume">Continuar</button></div>`
     : '';
-  if ($('#btnResume')) $('#btnResume').onclick = () => startFree(free.diff, free.code);
+  if ($('#btnResume')) $('#btnResume').onclick = () => startFree(free.diff, free.code, free.scen);
+}
+
+function pickScenario() {
+  const pref = store.get('scen', 'random');
+  return SCENARIOS[pref] ? pref : SCENARIO_IDS[Math.floor(Math.random() * SCENARIO_IDS.length)];
 }
 
 function updateCountdown() {
@@ -145,13 +161,18 @@ function startDaily() {
   openGame({ puz, mode: 'daily', date, num: caseNumber(today), ...(saved || blankState(puz.n)) });
 }
 
-function startFree(diff, code) {
+function startFree(diff, code, scen) {
   const saved = store.get('free', null);
   if (!code) code = randomCode();
-  const puz = generate('free-' + code, diff);
-  const state = saved && saved.code === code && saved.diff === diff ? saved.state : blankState(puz.n);
+  if (!SCENARIOS[scen]) scen = pickScenario();
+  const puz = generate('free-' + code, diff, scen);
+  const state = saved && saved.code === code && saved.diff === diff && saved.scen === scen ? saved.state : blankState(puz.n);
   openGame({ puz, mode: 'free', code, ...state });
-  history.replaceState(null, '', `${location.pathname}?caso=${code}&d=${diff}`);
+  history.replaceState(null, '', freeLink());
+}
+
+function freeLink() {
+  return `${location.pathname}?caso=${G.code}&d=${G.puz.diff}&e=${G.puz.scenario}`;
 }
 
 function openGame(game) {
@@ -163,9 +184,8 @@ function openGame(game) {
   const cfg = DIFFICULTIES[puz.diff];
   const V = puz.people[puz.victim];
 
-  $('#caseKicker').textContent = G.mode === 'daily'
-    ? `Caso del día · ${cfg.label} ${cfg.n}×${cfg.n}`
-    : `Modo ilimitado · ${cfg.label} ${cfg.n}×${cfg.n}`;
+  const scen = SCENARIOS[puz.scenario];
+  $('#caseKicker').textContent = `${G.mode === 'daily' ? 'Caso del día' : 'Modo ilimitado'} · ${scen.emoji} ${scen.name} · ${cfg.label} ${cfg.n}×${cfg.n}`;
   $('#caseTitle').textContent = G.mode === 'daily' ? `Expediente nº ${String(G.num).padStart(3, '0')}` : `Expediente #${G.code}`;
   $('#story').innerHTML = `${esc(V.short)}, ${esc(V.role)}, fue ${V.f ? 'hallada' : 'hallado'} sin vida en ${esc(puz.place)}. ` +
     `Hay ${puz.n - 1} sospechosos y una sola verdad: el asesino estaba a solas con su víctima.`;
@@ -188,6 +208,9 @@ function buildBoard() {
   const n = puz.n;
   const frame = $('#boardFrame');
   frame.style.setProperty('--n', n);
+  const scen = SCENARIOS[puz.scenario];
+  frame.className = `board-frame floor-${scen.floor}`;
+  scen.palette.forEach((col, i) => frame.style.setProperty(`--r${i}`, col));
 
   const labelCells = new Set();
   puz.roomTypes.forEach((_, id) => {
@@ -544,7 +567,7 @@ function showVerdict() {
     </div>`);
   $('#mShare').onclick = share;
   $('#mHome').onclick = () => { closeModal(); goHome(); };
-  if ($('#mNext')) $('#mNext').onclick = () => { closeModal(); startFree(G.puz.diff); };
+  if ($('#mNext')) $('#mNext').onclick = () => { closeModal(); startFree(G.puz.diff, null, pickScenario()); };
 }
 
 async function share() {
@@ -553,8 +576,9 @@ async function share() {
   const head = G.mode === 'daily'
     ? `🔍 MURDOKUS · Expediente nº ${String(G.num).padStart(3, '0')}`
     : `🔍 MURDOKUS · Expediente #${G.code}`;
-  const link = G.mode === 'daily' ? url : `${url}?caso=${G.code}&d=${G.puz.diff}`;
-  const text = `${head}\n${cfg.label} ${cfg.n}×${cfg.n} ${dots(G.puz.diff)}\n⏱️ ${fmt(G.elapsed)} · 🔎 ${G.hints} · ❌ ${G.mistakes}\n${link}`;
+  const link = G.mode === 'daily' ? url : location.origin + freeLink();
+  const scen = SCENARIOS[G.puz.scenario];
+  const text = `${head}\n${scen.emoji} ${scen.name} · ${cfg.label} ${cfg.n}×${cfg.n} ${dots(G.puz.diff)}\n⏱️ ${fmt(G.elapsed)} · 🔎 ${G.hints} · ❌ ${G.mistakes}\n${link}`;
   try {
     if (navigator.share && matchMedia('(pointer: coarse)').matches) await navigator.share({ text });
     else { await navigator.clipboard.writeText(text); toast('Resultado copiado al portapapeles.'); }
@@ -590,8 +614,11 @@ function closeModal() { $('#modal').hidden = true; }
 $('#modal').addEventListener('click', (e) => { if (e.target.id === 'modal' && $('#modal').dataset.closable) closeModal(); });
 
 function showHelp() {
-  const seats = Object.values(OBJECTS).filter((o) => !o.block);
-  const blocks = Object.values(OBJECTS).filter((o) => o.block);
+  // En partida, solo los muebles de ese escenario; en el archivo, los de la mansión clásica.
+  const scen = SCENARIOS[G?.puz.scenario] || SCENARIOS.mansion;
+  const used = [...new Set(scen.rooms.flatMap((r) => r.objs))].map((k) => OBJECTS[k]);
+  const seats = used.filter((o) => !o.block);
+  const blocks = used.filter((o) => o.block);
   const item = (o) => `<span>${o.rug ? '<span class="rugsw"></span>' : o.emoji} ${o.name}</span>`;
   modal(`
     <h3>Cómo se juega</h3>
@@ -602,12 +629,12 @@ function showHelp() {
       <li><i>«Más al norte»</i> significa en una fila superior del plano; <i>«más al oeste»</i>, en una columna más a la izquierda.</li>
       <li>La víctima estaba <b>a solas con su asesino</b>: en su habitación había exactamente dos personas. Cuando lo tengas todo, señala al culpable.</li>
     </ol>
-    <p><b>Se puede estar sobre:</b></p>
+    <p><b>${`Muebles ${G ? `de ${scen.name.toLowerCase()}` : 'de la mansión'}`.replace(' de el ', ' del ')} ${scen.emoji}.</b> Se puede estar sobre:</p>
     <div class="legend">${seats.map(item).join('')}</div>
     <p><b>No se puede estar sobre</b> (casillas sombreadas):</p>
     <div class="legend">${blocks.map(item).join('')}</div>
     <p class="small">Controles: elige un sospechoso (en la bandeja o en su ficha) y toca una casilla. Sin nadie elegido, tocar una casilla vacía la tacha con ✕. Toca a alguien en el plano para moverlo.</p>
-    <p class="small">Caso del día: lunes y martes fácil, de miércoles a viernes medio, fines de semana difícil.</p>`);
+    <p class="small">Caso del día: lunes y martes fácil, de miércoles a viernes medio, fines de semana difícil. El escenario cambia cada día: hay ${SCENARIO_IDS.length} distintos.</p>`);
 }
 
 function showStats() {
@@ -666,7 +693,7 @@ setInterval(updateCountdown, 30000);
   const code = params.get('caso');
   const d = params.get('d');
   renderHome();
-  if (code && DIFFICULTIES[d] && /^[A-Z0-9]{3,12}$/i.test(code)) startFree(d, code.toUpperCase());
+  if (code && DIFFICULTIES[d] && /^[A-Z0-9]{3,12}$/i.test(code)) startFree(d, code.toUpperCase(), params.get('e') || 'mansion');
   else if (!store.get('seen-help', false)) { store.set('seen-help', true); showHelp(); }
 })();
 
