@@ -40,29 +40,37 @@ export const ROOM_TYPES = [
   { name: 'Terraza',        art: 'la terraza',        objs: ['planta', 'cactus', 'silla', 'silla', 'estatua'] },
 ];
 
-// [emoji, nombre corto, papel, femenino]
+// [emoji, nombre corto, papel, femenino, tono de piel]
+// Tonos: 1 claro, 2 claro medio, 4 oscuro medio, 5 oscuro (el amarillo por defecto queda raro).
+const TONES = { 1: '\u{1F3FB}', 2: '\u{1F3FC}', 4: '\u{1F3FE}', 5: '\u{1F3FF}' };
+// El modificador va justo después del primer carácter (la persona), antes de cualquier unión ZWJ.
+const withTone = (emoji, t) => {
+  const [first, ...rest] = [...emoji];
+  return first + TONES[t] + rest.join('');
+};
+
 export const PEOPLE = [
-  ['🤵', 'Alfred', 'el mayordomo', 0],
-  ['👨‍🍳', 'Ramírez', 'el chef', 0],
-  ['👩‍⚕️', 'Dra. Vidal', 'la médica de la familia', 1],
-  ['🧛', 'Conde Varga', 'el aristócrata', 0],
-  ['👵', 'Lady Ashworth', 'la viuda', 1],
-  ['💃', 'Carmen', 'la cantante', 1],
-  ['👨‍🎨', 'Monsieur Blanc', 'el pintor', 0],
-  ['👩‍🔬', 'Prof. Ríos', 'la científica', 1],
-  ['👨‍✈️', 'Capitán Rojas', 'el aviador', 0],
-  ['👩‍🌾', 'Rosa', 'la jardinera', 1],
-  ['👸', 'Duquesa Imperia', 'la heredera', 1],
-  ['🤠', 'Coronel Cruz', 'el coronel retirado', 0],
-  ['👩‍💼', 'Sra. Prado', 'la abogada', 1],
-  ['👨‍⚖️', 'Juez Navarro', 'el juez', 0],
-  ['👩‍🎤', 'Lola Starr', 'la estrella del jazz', 1],
-  ['🧔', 'Tío Ernesto', 'el tío rico', 0],
-  ['👨‍💼', 'Don Julián', 'el banquero', 0],
-  ['👩‍🍳', 'Doña Pilar', 'la cocinera', 1],
-  ['👨‍🏫', 'Prof. Mora', 'el profesor', 0],
-  ['👩‍🦰', 'Miss Marlow', 'la periodista', 1],
-].map(([emoji, short, role, f]) => ({ emoji, short, role, f }));
+  ['🤵', 'Alfred', 'el mayordomo', 0, 1],
+  ['👨‍🍳', 'Ramírez', 'el chef', 0, 4],
+  ['👩‍⚕️', 'Dra. Vidal', 'la médica de la familia', 1, 5],
+  ['🧛', 'Conde Varga', 'el aristócrata', 0, 1],
+  ['👵', 'Lady Ashworth', 'la viuda', 1, 1],
+  ['💃', 'Carmen', 'la cantante', 1, 4],
+  ['👨‍🎨', 'Monsieur Blanc', 'el pintor', 0, 2],
+  ['👩‍🔬', 'Prof. Ríos', 'la científica', 1, 2],
+  ['👨‍✈️', 'Capitán Rojas', 'el aviador', 0, 5],
+  ['👩‍🌾', 'Rosa', 'la jardinera', 1, 4],
+  ['👸', 'Duquesa Imperia', 'la heredera', 1, 1],
+  ['💂', 'Coronel Cruz', 'el coronel retirado', 0, 2],
+  ['👩‍💼', 'Sra. Prado', 'la abogada', 1, 2],
+  ['👨‍⚖️', 'Juez Navarro', 'el juez', 0, 5],
+  ['👩‍🎤', 'Lola Starr', 'la estrella del jazz', 1, 5],
+  ['🧔', 'Tío Ernesto', 'el tío rico', 0, 1],
+  ['👨‍💼', 'Don Julián', 'el banquero', 0, 4],
+  ['👩‍🍳', 'Doña Pilar', 'la cocinera', 1, 1],
+  ['👨‍🏫', 'Prof. Mora', 'el profesor', 0, 4],
+  ['👩‍🦰', 'Miss Marlow', 'la periodista', 1, 2],
+].map(([emoji, short, role, f, t]) => ({ emoji: withTone(emoji, t), short, role, f }));
 
 export const PLACES = [
   'la Mansión Blackwood', 'Villa Esperanza', 'el Hotel Gran Continental', 'el Castillo de Montenegro',

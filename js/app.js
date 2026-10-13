@@ -309,12 +309,11 @@ function renderDossier() {
     return `<div class="card${p === puz.victim ? ' victim' : ''}${p === selected ? ' sel' : ''}" data-p="${p}" role="button" tabindex="0">
       <div class="mug">${pe.emoji}</div>
       <div>
-        <p class="c-name">${esc(pe.short)}</p>
+        <p class="c-name">${esc(pe.short)}${c >= 0 ? ` <span class="c-pos">📍 ${coord(c, puz.n)}</span>` : ''}</p>
         <p class="c-role">${esc(pe.role)}</p>
         <ul class="c-clues">${clues}</ul>
       </div>
       ${p === puz.victim ? '<span class="stamp">Víctima</span>' : ''}
-      ${c >= 0 ? `<span class="c-pos">📍 ${coord(c, puz.n)}</span>` : ''}
     </div>`;
   }).join('');
   $('#dossier').innerHTML = `
