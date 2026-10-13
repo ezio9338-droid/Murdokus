@@ -4,7 +4,7 @@ Puzles de asesinato al estilo sudoku, con estética noir. Coloca a cada sospecho
 
 - **Caso del día**: el mismo para todo el mundo. Lunes y martes fácil, de miércoles a viernes medio, y el fin de semana difícil. Lleva la cuenta de tu racha.
 - **Modo ilimitado**: casos nuevos sin límite en Fácil (5×5), Medio (6×6) o Difícil (7×7). Cada caso tiene un código (`?caso=ABCDE&d=medio`) que puedes compartir para retar a alguien con el mismo puzle.
-- **16 escenarios**, cada uno con sus habitaciones, muebles, personajes, lugares, armas y suelo propios: la mansión, el circo, el transatlántico, el teatro, la estación espacial, el tren nocturno, el museo, el castillo medieval, el barco pirata, el salvaje Oeste, el hospital, el estudio de cine, el chalet de montaña, la excavación en Egipto, el internado y el casino. El caso diario cambia de escenario cada día; en el modo ilimitado puedes elegirlo o dejarlo al azar.
+- **20 escenarios**, cada uno con sus habitaciones, muebles, personajes, lugares, armas y suelo propios: la mansión, el circo, el transatlántico, el teatro, la estación espacial, el tren nocturno, el museo, el castillo medieval, el barco pirata, el salvaje Oeste, el hospital, el estudio de cine, el chalet de montaña, la excavación en Egipto, el internado, el casino, el submarino, el zoo, el monasterio y la boda. El caso diario cambia de escenario cada día; en el modo ilimitado puedes elegirlo o dejarlo al azar.
 - En cada caso los nombres son todos españoles o todos extranjeros.
 - Cada caso se genera al momento y se comprueba que tenga **una única solución**.
 - Pistas, deshacer, marcas ✕, cronómetro, historial y resultado para compartir.
