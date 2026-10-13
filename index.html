@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Murdokus — Un asesinato al día</title>
+  <meta name="description" content="Puzles de asesinato al estilo sudoku: coloca a los sospechosos, uno por fila y columna, y descubre quién estaba a solas con la víctima.">
+  <meta name="theme-color" content="#120f0d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Murdokus">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="fx-light" aria-hidden="true"></div>
+  <div class="fx-grain" aria-hidden="true"></div>
+
+  <!-- ===================== ARCHIVO (INICIO) ===================== -->
+  <main id="home" class="screen">
+    <header class="hero">
+      <p class="kicker">Departamento de Homicidios · Archivo central</p>
+      <h1 class="logo">MURDOKUS</h1>
+      <p class="tagline">Un asesinato. Una persona por fila y por columna.<br>Quien estuvo a solas con la víctima… es el culpable.</p>
+    </header>
+
+    <section class="folder" id="dailyCard" aria-label="Caso del día"></section>
+
+    <section class="folder folder-alt" aria-label="Modo ilimitado">
+      <div class="folder-tab">Casos sin resolver</div>
+      <h2 class="folder-title">Modo ilimitado</h2>
+      <p class="folder-text">Abre tantos expedientes como quieras. Elige la dificultad:</p>
+      <div class="diff-grid" id="diffGrid"></div>
+      <div id="resumeFree"></div>
+    </section>
+
+    <nav class="home-links">
+      <button class="btn btn-ghost" id="btnHelp">📖 Cómo se juega</button>
+      <button class="btn btn-ghost" id="btnStats">🗂️ Historial</button>
+    </nav>
+
+    <footer class="foot">Inspirado en los Murdoku de Manuel Garand · Hecho con tinta, café y lógica</footer>
+  </main>
+
+  <!-- ===================== PARTIDA ===================== -->
+  <main id="game" class="screen" hidden>
+    <header class="game-head">
+      <button class="btn btn-ghost btn-sm" id="btnBack" aria-label="Volver al archivo">← Archivo</button>
+      <div class="case-id">
+        <span id="caseKicker"></span>
+        <h2 id="caseTitle"></h2>
+      </div>
+      <div class="timer" id="timer" aria-label="Tiempo">00:00</div>
+    </header>
+
+    <p class="story" id="story"></p>
+
+    <div class="game-layout">
+      <section class="board-col">
+        <div class="board-wrap">
+          <div class="board-frame" id="boardFrame"></div>
+          <div class="stamp-big" id="stampBig" hidden>CASO CERRADO</div>
+        </div>
+        <p class="cell-info" id="cellInfo">Elige un sospechoso y toca una casilla para situarlo. Sin nadie elegido, tocar una casilla la tacha.</p>
+        <div class="tray" id="tray" aria-label="Sospechosos"></div>
+        <div class="toolbar">
+          <button class="btn btn-ghost btn-sm" id="btnUndo">↶ Deshacer</button>
+          <button class="btn btn-ghost btn-sm" id="btnHint">🔎 Pista</button>
+          <button class="btn btn-ghost btn-sm" id="btnReset">⟲ Reiniciar</button>
+          <button class="btn btn-ghost btn-sm" id="btnRules">? Reglas</button>
+        </div>
+      </section>
+
+      <section class="dossier" id="dossier" aria-label="Declaraciones"></section>
+    </div>
+  </main>
+
+  <div class="modal" id="modal" hidden>
+    <div class="modal-card" id="modalCard" role="dialog" aria-modal="true"></div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
